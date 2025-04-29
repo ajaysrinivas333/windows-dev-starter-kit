@@ -8,6 +8,7 @@ import Zshrc from "./scripts/zshrc";
 import Git from "./scripts/git";
 import Editor from "./scripts/editor";
 import Browser from "./scripts/browser";
+import Terminal from "./scripts/terminal";
 
 export default class Setup {
   public static async process(): Promise<void> {
@@ -26,10 +27,13 @@ export default class Setup {
     // 2. Browser
     await Browser.process();
 
-    // 3. Code editor
+    // 3. Terminal
+    await Terminal.process();
+
+    // 4. Code editor
     await Editor.process();
 
-    // 4. nvm & Node.js
+    // 5. nvm & Node.js
     await NodeRuntime.process();
 
     // 6. Git

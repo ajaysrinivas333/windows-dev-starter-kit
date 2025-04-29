@@ -1,93 +1,104 @@
 import { execAsync } from "../utils";
-import select from "@inquirer/select";
+import checkbox from "@inquirer/checkbox";
 import Logger from "../utils/logger";
 
 export default class Browser {
-    private static readonly BROWSER_CMD = "open -a 'Google Chrome'";
+  private static readonly BROWSERS = [
+    {
+      name: "Google Chrome",
+      value: "chrome",
+      checkCmd: `defaults read "/Applications/Google Chrome.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: "brew install --cask google-chrome",
+    },
+    {
+      name: "Firefox",
+      value: "firefox",
+      checkCmd: `defaults read "/Applications/Firefox.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: "brew install --cask firefox",
+    },
+    {
+      name: "Brave",
+      value: "brave",
+      checkCmd: `defaults read "/Applications/Brave Browser.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: "brew install --cask brave-browser",
+    },
+    {
+      name: "Microsoft Edge",
+      value: "edge",
+      checkCmd: `defaults read "/Applications/Microsoft Edge.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: "brew install --cask microsoft-edge",
+    },
+  ];
 
-
-    private static readonly BROWSERS = [
-        {
-            value: "chrome",
-            name: "Google Chrome",
-            cmd: `defaults read "/Applications/Google Chrome.app/Contents/Info.plist" CFBundleShortVersionString`,
-            installCmd: "brew install --cask google-chrome",
-        },
-        {
-            value: "firefox",
-            name: "Firefox",
-            cmd: `defaults read "/Applications/Firefox.app/Contents/Info.plist" CFBundleShortVersionString`,
-            installCmd: "brew install --cask firefox",
-        },
-        {
-            value: "brave",
-            name: "Brave",
-            cmd: `defaults read "/Applications/Brave Browser.app/Contents/Info.plist" CFBundleShortVersionString`,
-            installCmd: "brew install --cask brave-browser",
-        },
-    ];
-
-
-/** Returns stdout if command succeeds, otherwise null */
-private static async tryCommand(cmd: string): Promise<string | null> {
+  /** Run a check command and return stdout or null */
+  private static async tryCommand(cmd: string): Promise<string | null> {
     try {
       const { stdout } = await execAsync(cmd);
-      return stdout;
-    } catch (err) {
-      Logger.error(`❌ Failed to run ${cmd}:`);
+      return stdout.trim();
+    } catch {
       return null;
     }
   }
 
-  /** Prompt user to select which browser to install */
-  private static async promptForBrowser(): Promise<string> {
-    return select({
-      message: "Select a browser to install:",
-      choices: this.BROWSERS.map((e) => ({
-        name: e.name,
-        value: e.value,
-        short: e.name,
-      })),
+  /** Prompt user to select browsers to install */
+  private static async promptForBrowsers(
+    availableChoices: typeof this.BROWSERS
+  ): Promise<string[]> {
+    const choices = availableChoices.map((b) => ({
+      name: b.name,
+      value: b.value,
+    }));
+
+    const selectedChoices = await checkbox({
+      message: "Select the browsers you want to install",
+      choices,
     });
+
+    return selectedChoices as string[];
   }
 
-
-  /** Install the chosen browser */
+  /** Install a given browser */
   private static async installBrowser(installCmd: string, name: string): Promise<void> {
-    Logger.log(`🔧 Installing ${name}...`);
+    Logger.info(`🔧 Installing ${name}...`);
     try {
-      const { stdout } = await execAsync(installCmd);
-      Logger.msg(stdout.trim());
+      await execAsync(installCmd);
       Logger.info(`✅ ${name} installed successfully.`);
     } catch (err) {
       Logger.error(`❌ Failed to install ${name}:`, err);
     }
   }
 
-  /** Public entry point */
+  /** Main entry point */
   public static async process(): Promise<void> {
-    Logger.log("🔍 Checking for existing browsers...");
+    Logger.log("🔍 Checking installed browsers...");
 
-    // Check if any browser is already installed
+    const notInstalled: typeof this.BROWSERS = [];
+
     for (const browser of this.BROWSERS) {
-      const version = await this.tryCommand(browser.cmd);
+      const version = await this.tryCommand(browser.checkCmd);
       if (version) {
-        Logger.info(`✅ ${browser.name} is already installed (v${version.trim()}). Skipping installation.`);
-        return;
+        Logger.info(`✅ ${browser.name} is already installed (v${version}). Skipping.`);
+      } else {
+        notInstalled.push(browser);
       }
     }
 
-    Logger.warn(
-      `No browsers found. Available options: ${this.BROWSERS.map((e) => e.name).join(", ")}.`
-    );
-
-    // Prompt user to choose one
-    const choice = await this.promptForBrowser();
-    const selected = this.BROWSERS.find((e) => e.value === choice);
-    if (selected) {
-      await this.installBrowser(selected.installCmd, selected.name);
+    if (notInstalled.length === 0) {
+      Logger.info("🎉 All browsers are already installed.");
+      return;
     }
 
-    Logger.info("🎉 Editor setup complete.");
+    const selectedChoices = await this.promptForBrowsers(notInstalled);
+
+    for (const choice of selectedChoices) {
+      const browser = notInstalled.find((b) => b.value === choice);
+      if (browser) {
+        await this.installBrowser(browser.installCmd, browser.name);
+      } else {
+        Logger.warn(`⚠️ Skipping unknown browser choice: ${choice}`);
+      }
+    }
+
+    Logger.info("✅ Browser setup complete.");
   }
 }
