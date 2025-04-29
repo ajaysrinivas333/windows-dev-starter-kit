@@ -10,7 +10,7 @@ A modern CLI tool to automate and bootstrap your macOS development environment i
 
 - ✅ macOS check
 - 🔧 Sets up Node.js using NVM
-- 🧶 Installs Yarn (optional)
+- 🧶 Installs Yarn (optional) - Upcoming
 - 🗂️ Installs and configures Git
 - 🖥️ Installs your preferred Code Editor (VSCode, Cursor, etc.)
 - 🌐 Installs browser tools (Chrome, Firefox, Brave)

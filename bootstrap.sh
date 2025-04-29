@@ -42,4 +42,4 @@ npm install
 
 # Step 6: Run the CLI
 echo "🚀 Running CLI..."
-npx ts-node index.ts
+npx ts-node src/index.ts
