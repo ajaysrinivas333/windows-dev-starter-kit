@@ -7,125 +7,130 @@ export default class Git {
   private static readonly GET_VERSION_CMD = "git --version";
   private static readonly INSTALL_CMD = "brew install git";
 
-  /** Checks if Git is already installed and returns its version, or null */
-  private static async fetchVersion(): Promise<string | null> {
+  /** Runs a shell command and logs trimmed output */
+  private static async runCommand(cmd: string, log = false): Promise<string> {
     try {
-      const { stdout } = await execAsync(this.GET_VERSION_CMD);
-      return stdout.trim();
+      const { stdout } = await execAsync(cmd);
+      const output = stdout.trim();
+      if (log && output) Logger.msg(output);
+      return output;
     } catch (err) {
-      Logger.error("Failed to check Git version:", err);
-      return null;
+      Logger.error(`❌ Command failed: ${cmd}`, err);
+      return "";
     }
+  }
+
+  /** Checks if Git is already installed and returns its version */
+  private static async fetchVersion(): Promise<string | null> {
+    const version = await this.runCommand(this.GET_VERSION_CMD);
+    return version || null;
   }
 
   /** Installs Git via Homebrew */
   private static async installGit(): Promise<void> {
-    Logger.log("➡️  Installing Git...");
-    try {
-      const { stdout } = await execAsync(this.INSTALL_CMD);
-      Logger.info("✅ Git installed successfully.");
-      Logger.msg(stdout.trim());
-    } catch (err) {
-      Logger.error("❌ Error installing Git:", err);
-    }
+    Logger.log("➡️ Installing Git...");
+    const output = await this.runCommand(this.INSTALL_CMD, true);
+    if (output) Logger.info("✅ Git installed successfully.");
   }
 
-  private static async promptForGitConfig(msg: string): Promise<string> {
-    return await select({
-      message: msg,
+  /** Prompts user for yes/no choice */
+  private static async confirm(message: string): Promise<boolean> {
+    const choice = await select({
+      message,
       choices: [
         { name: "Yes", value: "yes" },
         { name: "No", value: "no" },
       ],
     });
+    return choice === "yes";
   }
 
+  /** Configures Git username and email */
   private static async configureGit(): Promise<string> {
-    Logger.log("🔧 Configuring git username and email...");
+    Logger.log("🔧 Configuring Git username and email...");
 
     const name = await input({
-      message: "Enter your git username:",
-      validate(value) {
-        return (
-          value?.trim()?.length > 2 ||
-          "Name should be atleast 2 characters long"
-        );
-      },
-    });
-    const email = await input({
-      message: "Enter your git email:",
+      message: "Enter your Git username:",
       validate: (v) =>
-        (v?.trim()?.length > 0 && v?.includes("@")) || "Invalid email",
+        v?.trim()?.length > 2 || "Name must be at least 3 characters long",
     });
 
-    const { stdout } = await execAsync(
-      `git config --global user.name "${name}"`
-    );
-    Logger.msg(stdout.trim());
+    const email = await input({
+      message: "Enter your Git email:",
+      validate: (v) =>
+        (v?.trim()?.length > 0 && v.includes("@")) || "Invalid email address",
+    });
 
-    const { stdout: emailStdout } = await execAsync(
-      `git config --global user.email "${email}"`
-    );
-    Logger.msg(emailStdout.trim());
+    await this.runCommand(`git config --global user.name "${name}"`, true);
+    await this.runCommand(`git config --global user.email "${email}"`, true);
 
-    if (stdout && emailStdout) {
-      Logger.log("✅ Git username and email configuration complete");
-    }
-
+    Logger.log("✅ Git configuration complete");
     return email;
   }
 
-  private static async configureGitSSH(email: string): Promise<void> {
-    Logger.log("🔧 Configuring Git SSH...");
-    const fileName = `id_ed25519_${email}_${Date.now()}`;
+  /** Configures SSH key for GitHub */
+  private static async configureSSH(email: string): Promise<void> {
+    Logger.log("🔧 Setting up SSH for GitHub...");
 
-    const { stdout } = await execAsync(`ssh-keygen -t ed25519 -C "${email}" -f ~/.ssh/${fileName} -N ""`);
-    Logger.msg(stdout.trim());
+    const fileName = `id_ed25519_${email.replace(
+      /[^a-zA-Z0-9]/g,
+      "_"
+    )}_${Date.now()}`;
+    const sshPath = `~/.ssh/${fileName}`;
 
-    const { stdout: sshConfig } = await execAsync(`cat ~/.ssh/${fileName}.pub`);
+    await this.runCommand(
+      `ssh-keygen -t ed25519 -C "${email}" -f ${sshPath} -N ""`,
+      true
+    );
 
-    Logger.info("📝 Copy the following SSH key and paste it into your GitHub account");
-    Logger.msg(sshConfig.trim());
+    const publicKey = await this.runCommand(`cat ${sshPath}.pub`);
+    if (publicKey) {
+      Logger.info(
+        "📝 Copy the following SSH key and paste it into your GitHub account:"
+      );
+      Logger.msg(publicKey);
+    }
 
-    Logger.log("Adding SSH key to the SSH agent...");
+    await this.runCommand(`eval "$(ssh-agent -s)"`, true);
+    await this.runCommand(`ssh-add ${sshPath}`, true);
 
-    const { stdout: sshAgent } = await execAsync(`eval "$(ssh-agent -s)"`);
-    Logger.msg(sshAgent.trim());
-
-    const { stdout: sshAdd } = await execAsync(`ssh-add ~/.ssh/${fileName}`);
-    Logger.msg(sshAdd.trim());
-
-    Logger.log("✅ Git SSH configuration complete");
+    Logger.log("✅ SSH configuration complete");
   }
 
-  /** Orchestrates the Git setup */
+  /** Main orchestrator */
   public static async process(): Promise<void> {
     Logger.log("🔧 Starting Git setup...");
 
     const version = await this.fetchVersion();
     if (version) {
-      Logger.info(`Git is already installed: v${version}`);
+      Logger.info(`✅ Git is already installed: ${version}`);
     } else {
-      Logger.warn("Git is not installed.");
+      Logger.warn("🚫 Git is not installed.");
       await this.installGit();
     }
 
-    const config = await this.promptForGitConfig("Do you want to configure Git?");
-    let gitEmail: string | null = null;
-    if (config === "yes") {
-      gitEmail = await this.configureGit();
+    const shouldConfigureGit = await this.confirm(
+      "Do you want to configure Git?"
+    );
+    let email: string | null = null;
+
+    if (shouldConfigureGit) {
+      email = await this.configureGit();
     } else {
-      Logger.log("Skipping Git configuration");
+      Logger.log("ℹ️ Skipping Git configuration.");
     }
 
-
-    const ssh = await this.promptForGitConfig("Do you want to configure Git SSH?");
-    if (ssh === "yes" && gitEmail) {
-      await this.configureGitSSH(gitEmail);
-    } else {
-      Logger.log("Skipping Git SSH configuration");
+    if (email) {
+      const shouldConfigureSSH = await this.confirm(
+        "Do you want to configure Git SSH?"
+      );
+      if (shouldConfigureSSH) {
+        await this.configureSSH(email);
+      } else {
+        Logger.log("ℹ️ Skipping SSH configuration.");
+      }
     }
 
-    Logger.log("✅ Git setup complete");
+    Logger.log("🎉 Git setup complete!");
   }
 }
