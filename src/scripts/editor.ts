@@ -1,7 +1,7 @@
 
 import { execAsync } from "../utils";
 import Logger from "../utils/logger";
-import select from "@inquirer/select";
+import checkbox from "@inquirer/checkbox";
 
 export default class Editor {
   private static readonly EDITORS = [
@@ -17,6 +17,18 @@ export default class Editor {
       checkCmd: "cursor -v",
       installCmd: "brew install --cask cursor",
     },
+    {
+      value: 'intellij-ce',
+      name: 'IntelliJ IDEA Community Edition',
+      checkCmd: `defaults read "/Applications/IntelliJ IDEA CE.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: 'brew install --cask intellij-idea-ce',
+    },
+    {
+      value: 'intellij-ultimate',
+      name: 'IntelliJ IDEA Ultimate Edition',
+      checkCmd: `defaults read "/Applications/IntelliJ IDEA Ultimate.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: 'brew install --cask intellij-idea-ultimate',
+    }, 
   ];
 
   /** Returns stdout if command succeeds, otherwise null */
@@ -30,10 +42,10 @@ export default class Editor {
   }
 
   /** Prompt user to select which editor to install */
-  private static async promptForEditor(): Promise<string> {
-    return select({
-      message: "Select a code editor to install:",
-      choices: this.EDITORS.map((e) => ({
+  private static async promptForEditor(availableChoices: typeof this.EDITORS): Promise<string[]> {
+    return await checkbox({
+      message: "Do you want to install any of the following code editors?",
+      choices: availableChoices.map((e) => ({
         name: e.name,
         value: e.value,
         short: e.name,
@@ -56,27 +68,36 @@ export default class Editor {
   /** Public entry point */
   public static async process(): Promise<void> {
     Logger.log("🔍 Checking for existing code editors...");
-
-    // Check if any editor is already installed
+  
+    const notInstalled: typeof this.EDITORS = [];
+  
     for (const editor of this.EDITORS) {
       const version = await this.tryCommand(editor.checkCmd);
       if (version) {
-        Logger.info(`✅ ${editor.name} is already installed (v${version.trim()}). Skipping installation.`);
-        return;
+        Logger.info(`✅ ${editor.name} is already installed (v${version.trim()}). Skipping.`);
+      } else {
+        notInstalled.push(editor);
       }
     }
-
-    Logger.warn(
-      `No editors found. Available options: ${this.EDITORS.map((e) => e.name).join(", ")}.`
-    );
-
-    // Prompt user to choose one
-    const choice = await this.promptForEditor();
-    const selected = this.EDITORS.find((e) => e.value === choice);
-    if (selected) {
-      await this.installEditor(selected.installCmd, selected.name);
+  
+    if (notInstalled.length === 0) {
+      Logger.info("🎉 All code editors are already installed.");
+      return;
     }
-
-    Logger.info("🎉 Editor setup complete.");
+  
+  
+    const selectedChoices = await this.promptForEditor(notInstalled);
+  
+    for (const choice of selectedChoices) {
+      const editor = notInstalled.find((e) => e.value === choice);
+      if (editor) {
+        await this.installEditor(editor.installCmd, editor.name);
+      } else {
+        Logger.warn(`⚠️ Skipping unknown editor choice: ${choice}`);
+      }
+    }
+  
+    Logger.info("✅ Editor setup complete.");
   }
+  
 }

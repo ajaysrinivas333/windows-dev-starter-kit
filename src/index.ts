@@ -38,15 +38,11 @@ export default class Setup {
     // 6. Git
     await Git.process();
 
-    
-
-    // (you can add steps 6 & 7 here later: browsers, terminals…)
-
     Logger.log("\n🎉 Setup complete!");
   }
 }
 
 Setup.process().catch((err) => {
   Logger.error("Unhandled error during setup:", err);
-  process.exit(1);
+  process.exit(0);
 });
