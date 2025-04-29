@@ -1,0 +1,32 @@
+{
+  "name": "mac-dev-starter-kit",
+  "description": "A utility to easily install some of the commonly used tools for a Mac development environment",
+  "author": "Varadarajan M",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "npm run build:live",
+    "build": "tsc -p .",
+    "build:live": "nodemon -I --watch 'src/**/*.ts' --exec \"ts-node\" src/index.ts"
+  },
+  "keywords": [
+    "mac-dev-starter-kit",
+    "mac",
+    "development",
+    "environment",
+    "setup",
+    "tools",
+    "utilities"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.15.2",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@inquirer/select": "^4.2.0",
+    "chalk": "^5.4.1"
+  }
+}
