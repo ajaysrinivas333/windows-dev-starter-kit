@@ -1,4 +1,4 @@
-# 🛠️ Init Mac Dev
+# 🛠️ Mac Dev Starter Kit
 
 A modern CLI tool to automate and bootstrap your macOS development environment in minutes.
 
