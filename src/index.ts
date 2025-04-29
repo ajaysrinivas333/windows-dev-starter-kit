@@ -32,11 +32,11 @@ export default class Setup {
     // 4. nvm & Node.js
     await NodeRuntime.process();
 
-    // 5. .zshrc (backup & config)
-    await Zshrc.process();
-
     // 6. Git
     await Git.process();
+
+    // 7. .zshrc (backup & config)
+    await Zshrc.process();
 
     Logger.log("\n🎉 Setup complete!");
   }

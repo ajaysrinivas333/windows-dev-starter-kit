@@ -11,13 +11,12 @@ A modern CLI tool to automate and bootstrap your macOS development environment i
 - ✅ macOS check
 - 🔧 Sets up Node.js using NVM
 - 🧶 Installs Yarn (optional) - Upcoming
-- 🗂️ Installs and configures Git
+- 🗂️ Installs, configure and setup Git along with ssh keys.
 - 🖥️ Installs your preferred Code Editor (VSCode, Cursor, etc.)
 - 🌐 Installs browser tools (Chrome, Firefox, Brave)
 - 🖥️ Installs terminal apps (Warp, iTerm2)
 - ⚙️ Updates your `.zshrc` config
 
-> ❌ This script does not configure SSH keys.  
 > ✅ Requires Homebrew to be installed beforehand.
 
 ---
