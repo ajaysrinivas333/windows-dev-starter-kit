@@ -6,6 +6,9 @@ NVM_DIR="$HOME/.nvm"
 REPO_URL="https://github.com/Varadarajan-M/mac-dev-starter-kit.git"
 CLONE_DIR="$HOME/mac-dev-starter-kit"
 
+
+echo "🛠️ Mac Dev Starter Kit"
+echo "======================="
 # Step 1: Install NVM if missing
 echo "🔍 Checking for NVM..."
 
@@ -27,19 +30,20 @@ nvm install --lts
 nvm use --lts
 nvm alias default 'lts/*'
 
-# Step 4: Clone repo if not already in project directory
-if [ ! -f "package.json" ]; then
-  echo "📁 Cloning project repo..."
-  git clone "$REPO_URL" "$CLONE_DIR"
-  cd "$CLONE_DIR"
-else
-  echo "📂 Project already cloned. Continuing..."
+# Step 4: Remove existing clone and clone fresh
+if [ -d "$CLONE_DIR" ]; then
+  echo "🗑️ Removing existing repository..."
+  rm -rf "$CLONE_DIR"
 fi
+
+echo "📁 Cloning project repo..."
+git clone "$REPO_URL" "$CLONE_DIR"
+cd "$CLONE_DIR"
 
 # Step 5: Install dependencies
 echo "📦 Installing npm dependencies..."
 npm install
 
 # Step 6: Run the CLI
-echo "🚀 Running CLI..."
+echo "🚀 Running Mac Dev Starter Kit CLI..."
 npx ts-node src/index.ts
