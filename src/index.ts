@@ -1,4 +1,3 @@
-
 import Logger from "./utils/logger";
 import { isMacOs } from "./utils";
 
@@ -9,12 +8,11 @@ import Git from "./scripts/git";
 import Editor from "./scripts/editor";
 import Browser from "./scripts/browser";
 import Terminal from "./scripts/terminal";
+import Communication from "./scripts/communication";
 
 import checkbox from "@inquirer/checkbox";
 
 export default class Setup {
-
-
   private static async promptStepsToRun(): Promise<string[]> {
     const setupSteps = await checkbox({
       message: "🔧 Select the setup steps you want to run:",
@@ -32,7 +30,8 @@ export default class Setup {
         {
           name: "🖥️  Install Terminals",
           value: "terminals",
-          description: "\n💻 Install terminal apps like Warp, Alacritty, iTerm2, etc.",
+          description:
+            "\n💻 Install terminal apps like Warp, Alacritty, iTerm2, etc.",
         },
         {
           name: "🌐 Install Browsers",
@@ -40,24 +39,33 @@ export default class Setup {
           description: "\n🌍 Install Chrome, Firefox, Brave, and more.",
         },
         {
-          name: "🔐 Setup Git and Configure SSH Key",
-          value: "git",
-          description: "\n🛠️ Install Git, configure Git user, and generate an SSH key.",
-        },
-        {
           name: "📝 Install Code Editors",
           value: "editors",
-          description: "\n🧠 Choose from editors like VS Code, Cursor, IntelliJ, and more.",
+          description:
+            "\n🧠 Choose from editors like VS Code, Cursor, IntelliJ, and more.",
+        },
+        {
+          name: "💬 Install Communication Apps",
+          value: "communication",
+          description:
+            "\n💬 Install communication apps like Slack, Discord, Microsoft Teams, and more.",
+        },
+        {
+          name: "🔐 Setup Git and Configure SSH Key",
+          value: "git",
+          description:
+            "\n🛠️ Install Git, configure Git user, and generate an SSH key.",
         },
         {
           name: "⚡ Terminal Productivity Shortcuts",
           value: "zshrc",
-          description: "\n🚀 Add aliases, plugins, and shortcuts via an optimized .zshrc.",
+          description:
+            "\n🚀 Add aliases, plugins, and shortcuts via an optimized .zshrc.",
         },
       ],
+      pageSize: 20,
     });
-    
-    
+
     return setupSteps;
   }
 
@@ -106,6 +114,11 @@ export default class Setup {
     if (setupSteps.includes("zshrc")) {
       // 7. .zshrc (backup & config)
       await Zshrc.process();
+    }
+
+    if (setupSteps.includes("communication")) {
+      // 8. Communication apps
+      await Communication.process();
     }
 
     Logger.log("\n🎉 Setup complete!");
