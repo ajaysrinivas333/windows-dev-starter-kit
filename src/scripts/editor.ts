@@ -24,6 +24,18 @@ export default class Editor {
       installCmd: 'brew install --cask intellij-idea-ce',
     },
     {
+      value: "android-studio",
+      name: "Android Studio",
+      checkCmd: `defaults read "/Applications/Android Studio.app/Contents/Info.plist" CFBundleShortVersionString`,
+      installCmd: 'brew install --cask android-studio',
+    },
+    {
+      value: "xcode",
+      name: "Xcode",
+      checkCmd: `xcodebuild -version`,
+      installCmd: 'brew install --cask xcode',
+    },
+    {
       value: 'intellij-ultimate',
       name: 'IntelliJ IDEA Ultimate Edition',
       checkCmd: `defaults read "/Applications/IntelliJ IDEA Ultimate.app/Contents/Info.plist" CFBundleShortVersionString`,
