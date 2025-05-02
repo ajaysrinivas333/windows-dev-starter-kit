@@ -9,6 +9,7 @@ import Editor from "./scripts/editor";
 import Browser from "./scripts/browser";
 import Terminal from "./scripts/terminal";
 import Communication from "./scripts/communication";
+import JsPackageManager from "./scripts/js-package-manager";
 
 import checkbox from "@inquirer/checkbox";
 
@@ -26,6 +27,11 @@ export default class Setup {
           name: "🟢 Check Node.js",
           value: "node",
           description: "\n🔍 Verify if Node.js and npm are installed.",
+        },
+        {
+          name: "🔍 Install JavaScript Package Managers",
+          value: "js-package-manager",
+          description: "\n🔍 Install JavaScript package managers like yarn and pnpm. (Optional) npm is already installed.",
         },
         {
           name: "🖥️  Install Terminals",
@@ -82,42 +88,38 @@ export default class Setup {
     const setupSteps = await this.promptStepsToRun();
 
     if (setupSteps.includes("homebrew")) {
-      // 1. Homebrew
       await Homebrew.process();
     }
 
+    if (setupSteps.includes("js-package-manager")) {
+      await JsPackageManager.process();
+    }
+
     if (setupSteps.includes("browsers")) {
-      // 2. Browser
       await Browser.process();
     }
 
     if (setupSteps.includes("terminals")) {
-      // 3. Terminal
       await Terminal.process();
     }
 
     if (setupSteps.includes("editors")) {
-      // 4. Code editor
       await Editor.process();
     }
 
     if (setupSteps.includes("node")) {
-      // 5. nvm & Node.js
       await NodeRuntime.process();
     }
 
     if (setupSteps.includes("git")) {
-      // 6. Git
       await Git.process();
     }
 
     if (setupSteps.includes("zshrc")) {
-      // 7. .zshrc (backup & config)
       await Zshrc.process();
     }
 
     if (setupSteps.includes("communication")) {
-      // 8. Communication apps
       await Communication.process();
     }
 
