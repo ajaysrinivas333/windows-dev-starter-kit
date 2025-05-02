@@ -16,7 +16,7 @@ export default abstract class AbstractToolInstallationScript {
             return stdout.trim();
         } catch (err) {
             if (err instanceof Error) {
-                Logger.error(`❌ Command failed: ${cmd}`, err.message);
+                Logger.error(`❌ ${err.message}`);
             }
             return null;
         }
@@ -41,11 +41,15 @@ export default abstract class AbstractToolInstallationScript {
         label: string,
         items: Pick<InstallableItem, 'name' | 'description' | 'value'>[]
     ): Promise<string[]> {
+        console.log('\n\n');
         const selected = await checkbox({
             message: label,
             choices: items,
         });
-        Logger.info(`Selected items: ${selected}`);
+        console.log('\n\n');
+        if (selected.length > 0) {
+            Logger.info(`Selected items: ${selected}`);
+        }
         return selected;
     }
 
