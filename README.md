@@ -6,17 +6,37 @@ A modern CLI tool to automate and bootstrap your macOS development environment i
 
 ---
 
+## 🧱 Prerequisites
+
+Before running the setup, make sure the following are installed on your system:
+
+* ✅ **Xcode Command Line Tools**
+  Install using:
+
+  ```bash
+  xcode-select --install
+  ```
+
+* ✅ **Homebrew**
+  Install using:
+
+  ```bash
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ```
+
+---
+
 ## 🚀 Features
 
-- ✅ macOS check
-- 🔧 Sets up Node.js using NVM
-- 🧶 Installs JS Package Managers like yarn and pnpm.
-- 💬 Installs your preferred communication app (Slack, Discord, Microsoft Teams, etc.)
-- 🗂️ Installs, configure and setup Git along with ssh keys.
-- 🖥️ Installs your preferred Code Editor (VSCode, Cursor, etc.)
-- 🌐 Installs browser tools (Chrome, Firefox, Brave)
-- 🖥️ Installs terminal apps (Warp, iTerm2)
-- ⚙️ Updates your `.zshrc` config
+* ✅ macOS check
+* 🔧 Sets up Node.js using NVM
+* 🧶 Installs JS Package Managers like yarn and pnpm
+* 💬 Installs your preferred communication app (Slack, Discord, Microsoft Teams, etc.)
+* 🗂️ Installs, configures and sets up Git along with SSH keys
+* 🖥️ Installs your preferred Code Editor (VSCode, Cursor, etc.)
+* 🌐 Installs browser tools (Chrome, Firefox, Brave)
+* 🖥️ Installs terminal apps (Warp, iTerm2)
+* ⚙️ Updates your `.zshrc` config
 
 > ✅ Requires Homebrew to be installed beforehand.
 
@@ -32,10 +52,10 @@ bash -c "$(curl -fsSL https://raw.githubusercontent.com/Varadarajan-M/mac-dev-st
 
 This will:
 
-- Install NVM and the latest **LTS** version of Node.js
-- Clone the `init-mac-dev` project
-- Install dependencies
-- Launch the interactive CLI setup
+* Install NVM and the latest **LTS** version of Node.js
+* Clone the `init-mac-dev` project
+* Install dependencies
+* Launch the interactive CLI setup
 
 ---
 
@@ -66,4 +86,3 @@ npm start
 │   └── index.ts
 └── README.md          # You're here 🚀
 ```
-
