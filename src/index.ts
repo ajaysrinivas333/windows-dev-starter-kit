@@ -93,8 +93,6 @@ export default class Setup extends AbstractToolInstallationScript {
         if (failed.length > 0) {
             Logger.log(`❌ ${failed.length} tasks failed.`);
         }
-
-        process.exit(0);
     }
 
     public static async process(): Promise<void> {
@@ -156,6 +154,15 @@ export default class Setup extends AbstractToolInstallationScript {
         await this.runBackgroundTasks();
 
         Logger.log('\n🎉 Setup complete!');
+
+        Logger.log(
+            '👋 Thanks for using the cli, if you like it, please give me a star on github!'
+        );
+
+        Logger.info(
+            '👨🏻‍💻 Repository: https://github.com/Varadarajan-M/mac-dev-starter-kit'
+        );
+        process.exit(0);
     }
 }
 
