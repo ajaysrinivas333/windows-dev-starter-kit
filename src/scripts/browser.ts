@@ -1,6 +1,7 @@
 import { execAsync } from "../utils";
 import checkbox from "@inquirer/checkbox";
 import Logger from "../utils/logger";
+import { BackgroundTask } from "../types";
 
 export default class Browser {
   private static readonly BROWSERS = [
@@ -31,9 +32,12 @@ export default class Browser {
   ];
 
   /** Run a check command and return stdout or null */
-  private static async tryCommand(cmd: string): Promise<string | null> {
+  private static async tryCommand(cmd: string, log: boolean = true): Promise<string | null> {
     try {
       const { stdout } = await execAsync(cmd);
+      if (log) {
+        Logger.msg(stdout.trim());
+      }
       return stdout.trim();
     } catch {
       return null;
@@ -61,7 +65,7 @@ export default class Browser {
   private static async installBrowser(installCmd: string, name: string): Promise<void> {
     Logger.info(`🔧 Installing ${name}...`);
     try {
-      await execAsync(installCmd);
+      const msg = await this.tryCommand(installCmd);
       Logger.info(`✅ ${name} installed successfully.`);
     } catch (err) {
       Logger.error(`❌ Failed to install ${name}:`, err);
@@ -69,7 +73,7 @@ export default class Browser {
   }
 
   /** Main entry point */
-  public static async process(): Promise<void> {
+  public static async process(backgroundTasks: BackgroundTask[]): Promise<void> {
     Logger.log("🔍 Checking installed browsers...");
 
     const notInstalled: typeof this.BROWSERS = [];
@@ -93,12 +97,15 @@ export default class Browser {
     for (const choice of selectedChoices) {
       const browser = notInstalled.find((b) => b.value === choice);
       if (browser) {
-        await this.installBrowser(browser.installCmd, browser.name);
+        backgroundTasks.push({
+          name: browser.name,
+          description: `${browser.name} Installation`,
+          getPromise: () => this.installBrowser(browser.installCmd, browser.name),
+        });
       } else {
         Logger.warn(`⚠️ Skipping unknown browser choice: ${choice}`);
       }
     }
 
-    Logger.info("✅ Browser setup complete.");
   }
 }

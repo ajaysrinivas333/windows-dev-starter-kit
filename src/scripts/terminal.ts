@@ -1,7 +1,7 @@
 import { execAsync } from "../utils";
 import Logger from "../utils/logger";
 import checkbox from "@inquirer/checkbox";
-
+import { BackgroundTask } from "../types";
 export default class Terminal {
   private static readonly TERMINALS = [
     {
@@ -42,9 +42,12 @@ export default class Terminal {
     },
   ];
 
-  private static async tryCommand(cmd: string): Promise<string | null> {
+  private static async tryCommand(cmd: string, log: boolean = true): Promise<string | null> {
     try {
       const { stdout } = await execAsync(cmd);
+      if (log) {
+        Logger.msg(stdout.trim());
+      }
       return stdout.trim();
     } catch (error) {
       return null;
@@ -67,11 +70,15 @@ export default class Terminal {
     name: string
   ): Promise<void> {
     Logger.info(`Installing ${name}...`);
-    await execAsync(installCmd);
-    Logger.info(`${name} installed successfully.`);
+    const result = await this.tryCommand(installCmd);
+    if (result) {
+      Logger.info(`${name} installed successfully.`);
+    } else {
+      Logger.error(`Failed to install ${name}.`);
+    }
   }
 
-  public static async process(): Promise<void> {
+  public static async process(backgroundTasks: BackgroundTask[]): Promise<void> {
     const notInstalled: typeof this.TERMINALS = [];
 
     for (const terminal of this.TERMINALS) {
@@ -97,12 +104,14 @@ export default class Terminal {
     for (const choice of selectedChoices) {
       const terminal = notInstalled.find((t) => t.value === choice);
       if (terminal) {
-        await this.installTerminal(terminal.installCmd, terminal.name);
+        backgroundTasks.push({
+          name: terminal.name,
+          description: `${terminal.name} Installation`,
+          getPromise: () => this.installTerminal(terminal.installCmd, terminal.name),
+        });
       } else {
         Logger.warn(`⚠️ Skipping unknown terminal choice: ${choice}`);
       }
     }
-
-    Logger.info("✅ Terminal setup complete.");
   }
 }

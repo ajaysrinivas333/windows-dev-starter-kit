@@ -1,6 +1,7 @@
 import checkbox from "@inquirer/checkbox";
 import { execAsync } from "../utils";
 import Logger from "../utils/logger";
+import { BackgroundTask } from "../types";
 
 export default class Communication {
   private static readonly apps = [
@@ -38,7 +39,7 @@ export default class Communication {
     },
   ];
 
-  private static async tryCommand(command: string, log: boolean = false) {
+  private static async tryCommand(command: string, log: boolean = true) {
     try {
       const result = await execAsync(command);
       if (log) console.log(result.stdout);
@@ -81,7 +82,7 @@ export default class Communication {
     }
   }
 
-  public static async process() {
+  public static async process(backgroundTasks: BackgroundTask[]) {
     Logger.info("💬 Installing communication apps...");
 
     const appsForInstallation = await this.checkAlreadyInstalledApps();
@@ -101,9 +102,11 @@ export default class Communication {
         Logger.error(`Invalid app selected: ${appValue}`);
         continue;
       }
-      await this.installApp(app.installCommand, app.name, app.checkCommand);
+      backgroundTasks.push({
+        name: app.name,
+        description: `${app.name} Installation`,
+        getPromise: () => this.installApp(app.installCommand, app.name, app.checkCommand),
+      });
     }
-
-    Logger.info("✅ Communication apps installation complete.");
   }
 }

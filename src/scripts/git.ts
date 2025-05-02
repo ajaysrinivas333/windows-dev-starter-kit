@@ -2,6 +2,7 @@ import { execAsync } from "../utils";
 import Logger from "../utils/logger";
 import select from "@inquirer/select";
 import input from "@inquirer/input";
+import { BackgroundTask } from "../types";
 
 export default class Git {
   private static readonly GET_VERSION_CMD = "git --version";

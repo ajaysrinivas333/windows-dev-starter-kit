@@ -1,6 +1,7 @@
+import { BackgroundTask } from "../types";
 import { execAsync } from "../utils";
 import Logger from "../utils/logger";
-import checkbox  from "@inquirer/checkbox";
+import checkbox from "@inquirer/checkbox";
 
 
 export default class JsPackageManager {
@@ -18,7 +19,7 @@ export default class JsPackageManager {
             checkCmd: "pnpm --version",
             installCmd: "brew install pnpm",
         }
-    ]
+    ];
 
     private static async checkInstalledPackageManagers(): Promise<typeof this.packageManagers> {
         const notInstalled: typeof this.packageManagers = [];
@@ -31,7 +32,7 @@ export default class JsPackageManager {
         return notInstalled;
     }
     
-    private static async verifyPackageManagerInstallation(cmd:string, name:string): Promise<string | null> {
+    private static async verifyPackageManagerInstallation(cmd: string, name: string): Promise<string | null> {
         const result = await this.tryCommand(cmd);
         if (result) {
             Logger.info(`${name} ${result} is installed`);
@@ -54,7 +55,6 @@ export default class JsPackageManager {
     }
 
     private static async promptPackageManagerInstallation(packageManagers: typeof this.packageManagers) {
-
         const selectedPackageManagers = await checkbox({
             message: "Select the package managers you want to install",
             choices: packageManagers.map((pm) => ({
@@ -67,40 +67,42 @@ export default class JsPackageManager {
         return selectedPackageManagers;
     }
 
-
     private static async installPackageManager(pkgManager: typeof this.packageManagers[number]): Promise<void> {
         Logger.log(`🔧 Installing ${pkgManager.name}...`);
         try {
-            const { stdout } = await execAsync(pkgManager.installCmd);
-            Logger.msg(stdout.trim());
+            const msg = await this.tryCommand(pkgManager.installCmd);
             Logger.info(`✅ ${pkgManager.name} installed successfully.`);
         } catch (err) {
             Logger.error(`❌ Failed to install ${pkgManager.name}:`, err);
         }
     }
 
-
-    public static async process(): Promise<void> {
+    public static async process(backgroundTasks: BackgroundTask[]): Promise<void> {
         Logger.info("🔍 Checking for JavaScript package managers...");
         const notInstalled = await this.checkInstalledPackageManagers();
         
         if (notInstalled.length > 0) {
             const selectedPackageManagers = await this.promptPackageManagerInstallation(notInstalled);
             const pkgManagerMap = new Map(notInstalled?.map((pm) => [pm.value, pm]));
-            for (const packageManager of selectedPackageManagers) {
+            
+
+            // For each selected package manager, we'll add a background task to the queue
+            for (const  packageManager of selectedPackageManagers) {
                 const pkgManager = pkgManagerMap.get(packageManager.value);
                 if (!pkgManager) {
                     Logger.error(`Invalid package manager selected: ${packageManager.value}`);
                     continue;
                 }
-                await this.installPackageManager(pkgManager);
-            }
-        }
 
-        if(notInstalled.length === 0) {
+                // Add the task to backgroundTasks array
+                backgroundTasks.push({
+                    name: pkgManager.name,
+                    description: `${pkgManager.name} Installation`,
+                    getPromise: () => this.installPackageManager(pkgManager),
+                });
+            }
+        } else {
             Logger.log("✅ All package managers are already installed.");
         }
-
-        Logger.log("✅ JavaScript package managers installation complete.");
     }
 }
