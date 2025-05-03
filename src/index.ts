@@ -12,8 +12,11 @@ import Terminal from './scripts/terminal';
 import Communication from './scripts/communication';
 import JsPackageManager from './scripts/js-package-manager';
 import AbstractToolInstallationScript from './scripts/base-script';
+import ApiClient from './scripts/api';
 
 import type { BackgroundTask } from './types';
+import DatabaseClient from './scripts/database';
+import ProductivityTools from './scripts/productivity';
 
 export default class Setup extends AbstractToolInstallationScript {
     private static backgroundTasks: BackgroundTask[] = [];
@@ -65,10 +68,28 @@ export default class Setup extends AbstractToolInstallationScript {
                 '\n💬 Install communication apps like Slack, Discord, Microsoft Teams, and more.',
         },
         {
+            name: '📂 Install Productivity & Workspace Tools',
+            value: 'productivity',
+            description:
+                '\n📋 Install tools like Notion, Obsidian, Todoist, Loop, Raycast, and others that boost daily productivity.',
+        },
+        {
             name: '🎨 Install Design Tools',
             value: 'design',
             description:
                 '\n🎨 Install design tools like Figma, Sketch, and more.',
+        },
+        {
+            name: '🛠️ Install Backend & API Tools',
+            value: 'api-clients',
+            description:
+                '\n🧪 Install tools like Postman, Insomnia, and HTTPie for API testing and backend workflows.',
+        },
+        {
+            name: '🗄️ Install Database Clients',
+            value: 'database-clients',
+            description:
+                '\n🗃️ Install database tools like DBeaver, pgAdmin, TablePlus, MongoDB Compass, and more.',
         },
         {
             name: '🔍 Install JavaScript Package Managers',
@@ -146,6 +167,15 @@ export default class Setup extends AbstractToolInstallationScript {
                     break;
                 case 'design':
                     await Design.process(this.backgroundTasks);
+                    break;
+                case 'api-clients':
+                    await ApiClient.process(this.backgroundTasks);
+                    break;
+                case 'database-clients':
+                    await DatabaseClient.process(this.backgroundTasks);
+                    break;
+                case 'productivity':
+                    await ProductivityTools.process(this.backgroundTasks);
                     break;
                 default:
                     Logger.warn(`No action for step: ${step}`);
