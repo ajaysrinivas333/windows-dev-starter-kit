@@ -4,6 +4,7 @@ import { isMacOs } from './utils';
 import Git from './scripts/git';
 import Zshrc from './scripts/zshrc';
 import Editor from './scripts/editor';
+import Design from './scripts/design';
 import Browser from './scripts/browser';
 import NodeRuntime from './scripts/node';
 import Homebrew from './scripts/homebrew';
@@ -46,10 +47,10 @@ export default class Setup extends AbstractToolInstallationScript {
             description: '\n🌍 Install Chrome, Firefox, Brave, and more.',
         },
         {
-            name: '🔍 Install JavaScript Package Managers',
-            value: 'js-package-manager',
+            name: '📝 Install Code Editors',
+            value: 'editors',
             description:
-                '\n🔍 Install JavaScript package managers like yarn and pnpm. (Optional) npm is already installed.',
+                '\n🧠 Choose from editors like VS Code, Cursor, IntelliJ, and more.',
         },
         {
             name: '🖥️  Install Terminals',
@@ -58,16 +59,22 @@ export default class Setup extends AbstractToolInstallationScript {
                 '\n💻 Install terminal apps like Warp, Alacritty, iTerm2, etc.',
         },
         {
-            name: '📝 Install Code Editors',
-            value: 'editors',
-            description:
-                '\n🧠 Choose from editors like VS Code, Cursor, IntelliJ, and more.',
-        },
-        {
             name: '💬 Install Communication Apps',
             value: 'communication',
             description:
                 '\n💬 Install communication apps like Slack, Discord, Microsoft Teams, and more.',
+        },
+        {
+            name: '🎨 Install Design Tools',
+            value: 'design',
+            description:
+                '\n🎨 Install design tools like Figma, Sketch, and more.',
+        },
+        {
+            name: '🔍 Install JavaScript Package Managers',
+            value: 'js-package-manager',
+            description:
+                '\n🔍 Install JavaScript package managers like yarn and pnpm. (Optional) npm is already installed.',
         },
     ];
 
@@ -138,6 +145,9 @@ export default class Setup extends AbstractToolInstallationScript {
                     break;
                 case 'communication':
                     await Communication.process(this.backgroundTasks);
+                    break;
+                case 'design':
+                    await Design.process(this.backgroundTasks);
                     break;
                 default:
                     Logger.warn(`No action for step: ${step}`);
