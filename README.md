@@ -62,7 +62,7 @@ Before running the setup, make sure the following are installed on your system:
 * 🌐 Installs browser tools (Chrome, Firefox, Brave, etc.)
 * 🖥️ Installs terminal apps (Warp, iTerm2, Alacritty, etc.)
 * 🎨 Installs design tools (Figma, Sketch, Zeplin, etc.)
-* 📁 Installs productivity tools (Notion, Todoist, Raycast, Evernote, etc.)
+* 📁 Installs productivity tools (Notion, Todoist, Evernote, etc.)
 * 🔧 Installs backend tools (Postman, DBeaver, pgAdmin, MongoDB Compass etc.)
 * ⚙️ Updates your `.zshrc` config with aliases, plugins, and productivity tweaks
 * 🖥️ Installs essential macOS utilities (Loop, Rectangle, Raycast, etc.)
