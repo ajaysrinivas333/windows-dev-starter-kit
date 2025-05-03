@@ -17,6 +17,7 @@ import ApiClient from './scripts/api';
 import type { BackgroundTask } from './types';
 import DatabaseClient from './scripts/database';
 import ProductivityTools from './scripts/productivity';
+import AITools from './scripts/ai';
 
 export default class Setup extends AbstractToolInstallationScript {
     private static backgroundTasks: BackgroundTask[] = [];
@@ -54,6 +55,12 @@ export default class Setup extends AbstractToolInstallationScript {
             value: 'editors',
             description:
                 '\n🧠 Choose from editors like VS Code, Cursor, IntelliJ, and more.',
+        },
+        {
+            name: '🖥️  Install AI Tools',
+            value: 'ai',
+            description:
+                '\n🧠 Choose from AI tools like ChatGPT, Claude, etc.',
         },
         {
             name: '🖥️  Install Terminals',
@@ -176,6 +183,9 @@ export default class Setup extends AbstractToolInstallationScript {
                     break;
                 case 'productivity':
                     await ProductivityTools.process(this.backgroundTasks);
+                    break;
+                case 'ai':
+                    await AITools.process(this.backgroundTasks);
                     break;
                 default:
                     Logger.warn(`No action for step: ${step}`);

@@ -59,6 +59,7 @@ Before running the setup, make sure the following are installed on your system:
 * 🗂️ Installs, configures, and sets up Git with SSH keys
 * 💬 Installs your preferred communication apps (Slack, Discord, Microsoft Teams, etc.)
 * 🖥️ Installs your preferred code editor (VSCode, Cursor, IntelliJ, etc.)
+* ✨ Installs AI tools (ChatGPT, Claude, etc.)
 * 🌐 Installs browser tools (Chrome, Firefox, Brave, etc.)
 * 🖥️ Installs terminal apps (Warp, iTerm2, Alacritty, etc.)
 * 🎨 Installs design tools (Figma, Sketch, Zeplin, etc.)
