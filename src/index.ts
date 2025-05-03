@@ -79,7 +79,6 @@ export default class Setup extends AbstractToolInstallationScript {
     ];
 
     private static async runBackgroundTasks(): Promise<void> {
-        console.log('\n\n');
         Logger.log('🔍 Running the following tasks...');
         this.backgroundTasks.forEach((task, index) => {
             Logger.info(`${index + 1}. ${task.description}`);
@@ -87,7 +86,6 @@ export default class Setup extends AbstractToolInstallationScript {
         const promises = this.backgroundTasks.map((task) => task.getPromise());
         const results = await Promise.allSettled(promises);
 
-        console.log('\n\n');
         const success = results.filter(
             (result) => result.status === 'fulfilled'
         );
@@ -155,7 +153,7 @@ export default class Setup extends AbstractToolInstallationScript {
             }
         }
 
-        console.log('\n\n\n');
+        console.log('\n');
 
         Logger.log(
             "🛠️ \tAlright! we've collected all the stuff you need, let's install them..."

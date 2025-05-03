@@ -41,7 +41,6 @@ export default abstract class AbstractToolInstallationScript {
         label: string,
         items: Pick<InstallableItem, 'name' | 'description' | 'value'>[]
     ): Promise<string[]> {
-        console.log('\n ');
         const selected = await checkbox({
             message: label,
             choices: items,
