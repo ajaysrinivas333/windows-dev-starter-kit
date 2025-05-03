@@ -56,12 +56,16 @@ Before running the setup, make sure the following are installed on your system:
 
 * 🔧 Sets up Node.js using NVM
 * 🧶 Installs JS Package Managers like yarn and pnpm
-* 💬 Installs your preferred communication app (Slack, Discord, Microsoft Teams, etc.)
-* 🗂️ Installs, configures and sets up Git along with SSH keys
-* 🖥️ Installs your preferred Code Editor (VSCode, Cursor, Intellij, etc.)
+* 🗂️ Installs, configures, and sets up Git with SSH keys
+* 💬 Installs your preferred communication apps (Slack, Discord, Microsoft Teams, etc.)
+* 🖥️ Installs your preferred code editor (VSCode, Cursor, IntelliJ, etc.)
 * 🌐 Installs browser tools (Chrome, Firefox, Brave, etc.)
-* 🖥️ Installs terminal apps (Warp, iTerm2, etc.)
-* ⚙️ Updates your `.zshrc` config
+* 🖥️ Installs terminal apps (Warp, iTerm2, Alacritty, etc.)
+* 🎨 Installs design tools (Figma, Sketch, Zeplin, etc.)
+* 📁 Installs productivity tools (Notion, Todoist, Raycast, Evernote, etc.)
+* 🔧 Installs backend tools (Postman, DBeaver, pgAdmin, MongoDB Compass etc.)
+* ⚙️ Updates your `.zshrc` config with aliases, plugins, and productivity tweaks
+* 🖥️ Installs essential macOS utilities (Loop, Rectangle, Raycast, etc.)
 
 > ✅ Requires Homebrew to be installed beforehand.
 
