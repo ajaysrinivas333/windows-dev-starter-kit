@@ -1,49 +1,96 @@
-$LogFile = "$env:USERPROFILE\setup-log.txt"
-Set-Content -Path $LogFile -Value "Script started at: $(Get-Date)" -Force
+# bootstrap.ps1
+
+# Configuration
+$LogFile    = "$env:USERPROFILE\setup-log.txt"
+$RepoUrl    = "https://github.com/ajaysrinivas333/windows-dev-starter-kit.git"
+$ClonePath  = "$env:USERPROFILE\windows-dev-starter-kit"
+
+# Logging helper
+function Log {
+    param([string]$Message, [string]$Color = 'White')
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    $entry     = "$timestamp - $Message"
+    # Write to console
+    Write-Host $entry -ForegroundColor $Color
+    # Append to log file
+    $entry | Out-File -FilePath $LogFile -Append
+}
+
+# Start
+Log "==============================="
+Log "🛠️  Windows Dev Starter Kit"
+Log "==============================="
 
 try {
-    Write-Host "🛠️ Mac Dev Starter Kit Setup" -ForegroundColor Green | Out-File -Append -FilePath $LogFile
-
-    # Step 1: Install NVM if missing
-    Write-Host "🔍 Checking for NVM..." -ForegroundColor Green | Out-File -Append -FilePath $LogFile
-    if (-not (Test-Path $env:USERPROFILE\.nvm)) {
-        Write-Host "📥 Installing NVM..." -ForegroundColor Yellow | Out-File -Append -FilePath $LogFile
-        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh" -OutFile "$env:USERPROFILE\nvm-install.sh"
-        bash "$env:USERPROFILE\nvm-install.sh"
+    # Chocolatey
+    Log "🔍 Checking for Chocolatey..." Yellow
+    if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+        Log "📥 Installing Chocolatey..." Yellow
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-Expression ((New-Object Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        Log "✅ Chocolatey installed" Green
     } else {
-        Write-Host "✅ NVM is already installed" -ForegroundColor Green | Out-File -Append -FilePath $LogFile
+        Log "✅ Chocolatey already installed" Cyan
     }
 
-    # Step 2: Check for Node.js version
-    Write-Host "🔍 Checking for Node.js..." -ForegroundColor Green | Out-File -Append -FilePath $LogFile
-    if (-not (Get-Command "node" -ErrorAction SilentlyContinue)) {
-        Write-Host "📥 Installing Node.js via NVM..." -ForegroundColor Yellow | Out-File -Append -FilePath $LogFile
-        nvm install --lts
-        nvm use --lts
+    # Git
+    Log "🔍 Checking for Git..." Yellow
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Log "📥 Installing Git via Chocolatey..." Yellow
+        choco install git -y
+        Log "✅ Git installed" Green
     } else {
-        Write-Host "✅ Node.js is already installed" -ForegroundColor Green | Out-File -Append -FilePath $LogFile
+        Log "✅ Git already installed" Cyan
     }
 
-    # Step 3: Remove existing clone and clone fresh
-    if (Test-Path "$env:USERPROFILE\mac-dev-starter-kit") {
-        Write-Host "🗑️ Removing existing repository..." -ForegroundColor Yellow | Out-File -Append -FilePath $LogFile
-        Remove-Item -Path "$env:USERPROFILE\mac-dev-starter-kit" -Recurse -Force
+    # NVM & Node.js
+    Log "🔍 Checking for Node.js..." Yellow
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Log "📥 Installing NVM for Windows..." Yellow
+        choco install nvm -y
+
+        # Setup environment for NVM
+        $nvmHome       = "$env:ProgramData\chocolatey\lib\nvm\tools\nvm.exe"
+        $env:NVM_HOME  = Split-Path $nvmHome
+        $env:Path     += ";$env:NVM_HOME;$env:APPDATA\npm"
+
+        Log "📦 Installing latest LTS Node.js via NVM..." Yellow
+        & $nvmHome install lts
+        & $nvmHome use lts
+        Log "✅ Node.js installed (LTS)" Green
+    } else {
+        Log "✅ Node.js already installed" Cyan
     }
 
-    Write-Host "📁 Cloning project repo..." -ForegroundColor Green | Out-File -Append -FilePath $LogFile
-    git clone "https://github.com/Varadarajan-M/mac-dev-starter-kit.git" "$env:USERPROFILE\mac-dev-starter-kit"
+    # Clone repository
+    if (Test-Path $ClonePath) {
+        Log "🗑️  Removing existing repository..." Yellow
+        Remove-Item -Recurse -Force $ClonePath
+        Log "✅ Old repo removed" Green
+    }
+    Log "📁 Cloning project repo..." Yellow
+    git clone $RepoUrl $ClonePath
+    Log "✅ Repo cloned to $ClonePath" Green
 
-    # Step 4: Install npm dependencies
-    Write-Host "📦 Installing npm dependencies..." -ForegroundColor Green | Out-File -Append -FilePath $LogFile
-    Set-Location -Path "$env:USERPROFILE\mac-dev-starter-kit"
+    # Install dependencies
+    Log "📦 Installing npm dependencies..." Yellow
+    Push-Location $ClonePath
     npm install
+    Log "✅ npm install complete" Green
+    Pop-Location
 
-    # Step 5: Run the CLI
-    Write-Host "🚀 Running Mac Dev Starter Kit CLI..." -ForegroundColor Green | Out-File -Append -FilePath $LogFile
+    # Run CLI
+    Log "🚀 Running Dev Starter Kit CLI..." Yellow
+    Push-Location $ClonePath
     npx ts-node src/index.ts
+    Pop-Location
+    Log "✅ CLI executed successfully" Green
 
-    Write-Host "🛠️ Setup Complete!" -ForegroundColor Green | Out-File -Append -FilePath $LogFile
-
-} catch {
-    Write-Host "❌ Error: $_" -ForegroundColor Red | Out-File -Append -FilePath $LogFile
+    Log "🛠️ Setup Complete!" Green
+}
+catch {
+    Log "❌ ERROR: $($_.Exception.Message)" Red
+    Write-Error "An error occurred—see log at $LogFile"
+    exit 1
 }
