@@ -9,14 +9,14 @@ A modern CLI tool to automate and bootstrap your macOS development environment i
 
 If you already have **Homebrew** and **XCode Command Line Tools** installed, bootstrap your dev setup with:
 
-```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/Varadarajan-M/mac-dev-starter-kit/main/bootstrap.sh)"
+```cmd
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/ajaysrinivas333/windows-dev-starter-kit/main/bootstrap.ps1'))"
 ```
 
 This will:
 
 * Install NVM and the latest **LTS** version of Node.js
-* Clone the `mac-dev-starter-kit` project
+* Clone the `windows-dev-starter-kit` project
 * Install dependencies
 * Launch the interactive CLI setup
 
